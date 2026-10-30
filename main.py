@@ -33,14 +33,18 @@ def check_curve_parameters(curve):
         None. Prints analysis results to the console.
     """
     try:
-        # The cryptography curve objects expose a name and a key size, and
-        # nothing else about the group. An earlier version called
-        # curve.order() and curve.cofactor here; neither exists on these
-        # objects, so every run logged an error and printed no parameters
-        # at all. Report what the library actually gives, and do not guess
-        # at an order value that is not available to check against.
+        # An earlier version called curve.order() and curve.cofactor here;
+        # neither exists on these objects, so every run logged an error
+        # and printed no parameters at all. What the library does expose
+        # is group_order (it matches the published order for the named
+        # curves, checked for secp256r1), so report it through getattr:
+        # older library versions without it still get the name and size
+        # instead of an AttributeError.
         logging.info(f"Curve Name: {curve.name}")
         logging.info(f"Curve Key Size: {curve.key_size} bits")
+        group_order = getattr(curve, "group_order", None)
+        if group_order is not None:
+            logging.info(f"Curve Group Order: {group_order}")
 
     except Exception as e:
         logging.error(f"Error checking curve parameters: {e}")
