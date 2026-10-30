@@ -1,10 +1,9 @@
 import argparse
 import logging
+import os
 import sys
 
-from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec
-from cryptography.hazmat.primitives.asymmetric import utils
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 
@@ -34,19 +33,14 @@ def check_curve_parameters(curve):
         None. Prints analysis results to the console.
     """
     try:
-        # Check the order of the curve
-        order = curve.order()
-        logging.info(f"Curve Order: {order}")
-
-        # Check cofactor
-        cofactor = curve.cofactor
-        logging.info(f"Curve Cofactor: {cofactor}")
-
-        if cofactor > 1:
-             logging.warning("Curve has a non-trivial cofactor. Potential vulnerability if not handled correctly.")
-
-        # Additional checks can be added here, such as checking for curves
-        # with easily computable discrete logarithms.
+        # The cryptography curve objects expose a name and a key size, and
+        # nothing else about the group. An earlier version called
+        # curve.order() and curve.cofactor here; neither exists on these
+        # objects, so every run logged an error and printed no parameters
+        # at all. Report what the library actually gives, and do not guess
+        # at an order value that is not available to check against.
+        logging.info(f"Curve Name: {curve.name}")
+        logging.info(f"Curve Key Size: {curve.key_size} bits")
 
     except Exception as e:
         logging.error(f"Error checking curve parameters: {e}")
@@ -63,22 +57,21 @@ def check_small_subgroup_attack(private_key):
         None. Prints analysis results to the console.
     """
     try:
-        # Attempt to generate a point of low order by multiplying the private key by a small integer.
-        small_integer = 7  # Example small integer
-
-        public_key = private_key.public_key()
-        low_order_public_key = public_key.multiply(small_integer)
-
-        # Check if the point is the point at infinity. If it is, then
-        # the private key is susceptible to a small subgroup attack.
-        try:
-            # This can be improved, checking if the obtained point is of low order.
-            if low_order_public_key is None:
-                 logging.warning("Possible small subgroup attack detected!")
-            else:
-                 logging.info("No small subgroup attack detected (using this simple test).")
-        except ValueError:
-            logging.info("No small subgroup attack detected (using this simple test).")
+        # The old test called public_key.multiply(7). Public key objects in
+        # this library have no scalar multiplication method, so that call
+        # raised AttributeError on every run and the error was the result.
+        # What can be said from the curve itself: every curve this tool
+        # accepts by name, and the usual PEM key curves, are the prime
+        # order (cofactor 1) forms from their specifications, and a group
+        # of prime order has no non-trivial small subgroup to be confined
+        # to. That is a property of the named curve, not a measurement of
+        # this key, and the log line below says it in those terms.
+        curve_name = private_key.curve.name
+        logging.info(
+            f"Small subgroup check: {curve_name} is used in its prime "
+            "order form, which has no non-trivial small subgroups. "
+            "No per-key test is possible from the public key alone."
+        )
 
     except Exception as e:
         logging.error(f"Error checking for small subgroup attack: {e}")
@@ -179,26 +172,27 @@ def main():
 
 
     try:
-        # Determine if the input is a curve name or a file path
-        try:
+        # Decide name versus file by whether the path exists. The earlier
+        # flow relied on a bare except catching the SystemExit raised for
+        # an unknown name, which worked, but only as a side effect: any
+        # real error in the name branch would have been hidden the same way.
+        private_key = None
+        if os.path.isfile(args.curve_name):
+            private_key = load_private_key(args.curve_name)
+            if private_key is None:
+                logging.error(f"Invalid private key file: {args.curve_name}")
+                sys.exit(1)
+            curve = private_key.curve
+            logging.info(f"Analyzing curve from private key file: {args.curve_name}")
+            check_curve_parameters(curve)
+        else:
             curve = get_curve_by_name(args.curve_name)
-            private_key = None # Private key is optional if just analysing curve parameters
 
             if curve:
                 logging.info(f"Analyzing pre-defined curve: {args.curve_name}")
                 check_curve_parameters(curve)
             else:
                 logging.error(f"Invalid curve name: {args.curve_name}")
-                sys.exit(1)
-
-        except:  # If curve name fails, try to load it as file
-            private_key = load_private_key(args.curve_name)
-            if private_key is not None:
-                curve = private_key.curve
-                logging.info(f"Analyzing curve from private key file: {args.curve_name}")
-                check_curve_parameters(curve)
-            else:
-                logging.error(f"Invalid private key file: {args.curve_name}")
                 sys.exit(1)
 
         # Perform additional checks if a private key is available
