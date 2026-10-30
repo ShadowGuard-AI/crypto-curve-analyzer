@@ -1,3 +1,5 @@
+![Banner](banner.png)
+
 # crypto-curve-analyzer
 Analyzes elliptic curves used in cryptography, checking for weak curve parameters, small subgroup attacks, and other potential vulnerabilities. Supports common curves and allows importing custom curve definitions. - Focused on Basic cryptographic operations
 
