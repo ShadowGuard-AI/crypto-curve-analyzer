@@ -14,17 +14,17 @@ def setup_argparse():
     """
     Sets up the argument parser for the command-line interface.
     """
-    parser = argparse.ArgumentParser(description="Analyzes elliptic curves for cryptographic weaknesses.")
+    parser = argparse.ArgumentParser(description="Reports elliptic curve parameters for a named curve or a PEM key file.")
     parser.add_argument("curve_name", help="Name of the pre-defined elliptic curve (e.g., secp256r1) or path to a PEM-encoded private key file.")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output for debugging.")
-    parser.add_argument("--check-small-subgroup", action="store_true", help="Check for small subgroup attacks.")
-    parser.add_argument("--output-public-key", action="store", dest="output_public_key", help="Output public key in PEM format to the specified file.")
+    parser.add_argument("--check-small-subgroup", action="store_true", help="Report the prime order note for the curve of a PEM key file. Requires a key file; not applicable on a named curve run without one.")
+    parser.add_argument("--output-public-key", action="store", dest="output_public_key", help="Output public key in PEM format to the specified file. Requires a key file; not applicable on a named curve run without one.")
     return parser.parse_args()
 
 
 def check_curve_parameters(curve):
     """
-    Checks basic curve parameters for potential weaknesses.
+    Reports basic curve parameters.
 
     Args:
         curve: The elliptic curve object.
@@ -52,7 +52,7 @@ def check_curve_parameters(curve):
 
 def check_small_subgroup_attack(private_key):
     """
-    Checks for susceptibility to small subgroup attacks.
+    Reports the prime order note for the curve of a private key.
 
     Args:
         private_key: The elliptic curve private key.
@@ -72,13 +72,13 @@ def check_small_subgroup_attack(private_key):
         # this key, and the log line below says it in those terms.
         curve_name = private_key.curve.name
         logging.info(
-            f"Small subgroup check: {curve_name} is used in its prime "
+            f"Prime order note: {curve_name} is used in its prime "
             "order form, which has no non-trivial small subgroups. "
             "No per-key test is possible from the public key alone."
         )
 
     except Exception as e:
-        logging.error(f"Error checking for small subgroup attack: {e}")
+        logging.error(f"Error reporting prime order note: {e}")
 
 
 
@@ -159,8 +159,10 @@ def output_public_key_to_file(private_key, output_file):
         with open(output_file, "wb") as f:
             f.write(pem)
         logging.info(f"Public key written to {output_file}")
+        return True
     except Exception as e:
         logging.error(f"Error writing public key to file: {e}")
+        return False
 
 
 
@@ -205,7 +207,14 @@ def main():
                 check_small_subgroup_attack(private_key)
 
             if args.output_public_key:
-                output_public_key_to_file(private_key, args.output_public_key)
+                if not output_public_key_to_file(private_key, args.output_public_key):
+                    logging.error("Public key write failed.")
+                    sys.exit(1)
+        else:
+            if args.check_small_subgroup:
+                print("Not applicable: --check-small-subgroup requires a PEM key file and does not run on a named curve run without one.")
+            if args.output_public_key:
+                print("Not applicable: --output-public-key requires a PEM key file and does not run on a named curve run without one.")
 
 
     except Exception as e:
