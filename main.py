@@ -40,6 +40,9 @@ def check_curve_parameters(curve):
         # curves, checked for secp256r1), so report it through getattr:
         # older library versions without it still get the name and size
         # instead of an AttributeError.
+        # Everything this check reports goes to the log only. A user
+        # reading standard output sees nothing from a named curve run
+        # unless logging happens to be pointed at their terminal.
         logging.info(f"Curve Name: {curve.name}")
         logging.info(f"Curve Key Size: {curve.key_size} bits")
         group_order = getattr(curve, "group_order", None)
@@ -120,6 +123,9 @@ def get_curve_by_name(curve_name):
     """
     try:
         if curve_name == "secp256r1":
+            # I match the name exactly, case included. The capitalised
+            # spelling Secp256r1 that some libraries use is not accepted
+            # here, and the caller gets the unsupported message instead.
             return ec.SECP256R1()
         elif curve_name == "secp256k1":
             return ec.SECP256K1()
@@ -188,6 +194,9 @@ def main():
             if private_key is None:
                 logging.error(f"Invalid private key file: {args.curve_name}")
                 sys.exit(1)
+            # I reach for .curve here, so a PEM holding an RSA key gets as
+            # far as this line before failing, and the message calls it an
+            # unexpected error rather than a wrong key type.
             curve = private_key.curve
             logging.info(f"Analyzing curve from private key file: {args.curve_name}")
             check_curve_parameters(curve)
