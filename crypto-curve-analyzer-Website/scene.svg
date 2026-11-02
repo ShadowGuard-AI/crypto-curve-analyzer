@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="360" viewBox="0 0 900 360">
+<rect width="900" height="360" fill="#0D1124"/>
+<g><rect x="30" y="70" width="220" height="180" fill="#E8EDF2"><animate attributeName="fill-opacity" values="1;0.88" dur="30s" fill="freeze"/></rect>
+<rect x="30" y="70" width="220" height="180" fill="none" stroke="#08080D" stroke-width="6"/></g>
+<g><polygon points="250,110 760,140 760,206 250,220" fill="#F2A93B" fill-opacity="0.16"/>
+<polygon points="250,140 760,156 760,190 250,196" fill="#F2A93B" fill-opacity="0.2"/>
+<circle cx="430" cy="150" r="2.4" fill="#F5DCA0"><animate attributeName="cx" values="430;560" dur="17s" repeatCount="indefinite"/></circle>
+<circle cx="520" cy="180" r="2" fill="#F5DCA0"><animate attributeName="cx" values="520;640" dur="21s" repeatCount="indefinite"/></circle>
+<circle cx="360" cy="196" r="1.8" fill="#F5DCA0"><animate attributeName="cx" values="360;470" dur="13s" repeatCount="indefinite"/></circle>
+<g><rect x="742" y="128" width="130" height="104" fill="#18203C" stroke="#F2A93B" stroke-width="3"/>
+<ellipse cx="786" cy="168" rx="26" ry="26" fill="#F2A93B"/>
+<g><circle cx="800" cy="66" r="46" fill="#1B2340" stroke="#F2A93B" stroke-width="4"/>
+<circle cx="800" cy="34" r="12" fill="#0D1124" stroke="#E8EDF2" stroke-width="2"/><circle cx="830" cy="76" r="12" fill="#0D1124" stroke="#E8EDF2" stroke-width="2"/><circle cx="770" cy="76" r="12" fill="#0D1124" stroke="#E8EDF2" stroke-width="2"/><circle cx="838" cy="48" r="12" fill="#0D1124" stroke="#E8EDF2" stroke-width="2"/><circle cx="762" cy="48" r="12" fill="#0D1124" stroke="#E8EDF2" stroke-width="2"/>
+<circle cx="800" cy="66" r="9" fill="#08080D"/>
+<animateTransform attributeName="transform" type="rotate" from="0 800 66" to="360 800 66" dur="16s" repeatCount="indefinite"/></g>
+<g fill="none" stroke="#E8EDF2" stroke-width="1.4"><rect x="726" y="118" width="7" height="15"><animate attributeName="x" values="726;733;740;747" keyTimes="0;0.33;0.66;1" calcMode="discrete" dur="2.4s" repeatCount="indefinite"/></rect></g></g>
+<g fill="#10142A" stroke="#28335C" stroke-width="2"><rect x="60" y="286" width="70" height="34" rx="7"/><rect x="150" y="286" width="70" height="34" rx="7"/><rect x="240" y="286" width="70" height="34" rx="7"/><rect x="330" y="286" width="70" height="34" rx="7"/><rect x="420" y="286" width="70" height="34" rx="7"/></g>
+<g><rect x="600" y="286" width="120" height="40" fill="#1B2340" stroke="#F2A93B" stroke-width="2"/><rect x="736" y="286" width="120" height="40" fill="#1B2340" stroke="#F2A93B" stroke-width="2"/><rect x="612" y="296" width="96" height="4" fill="#E8EDF2" opacity="0.6"/><rect x="748" y="296" width="96" height="4" fill="#E8EDF2" opacity="0.6"/></g>
+</svg>
